@@ -1,0 +1,12 @@
+# zippy-standards (ZS-025): pin line endings so scripts and hooks behave the
+# same on every OS. Shell scripts and hooks must be LF or sh cannot run them.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary

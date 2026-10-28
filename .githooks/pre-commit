@@ -1,0 +1,45 @@
+#!/bin/sh
+# zippy-standards pre-commit — ZS-010 (no blind commits), ZS-022 (secrets),
+# and the fast gate (ZS-020). Enable with: git config core.hooksPath .githooks
+#
+# Bypass only with `git commit --no-verify` AND a written reason in the
+# commit message. The same gate runs again at pre-push and in CI.
+
+fail=0
+
+# ZS-010: warn loudly when a commit is unusually broad — that is what
+# "git add -A" in an unfamiliar directory looks like.
+staged=$(git diff --cached --name-only | wc -l | tr -d ' ')
+if [ "$staged" -gt 40 ]; then
+  echo ""
+  echo "  NOTE: $staged files staged. ZS-010 - never blind-commit."
+  echo "  Confirm you meant all of these:"
+  git diff --cached --name-only | sed 's/^/    /'
+  echo ""
+fi
+
+# ZS-022: scan what is about to be committed. gitleaks is optional locally
+# (CI and the nightly run it regardless) but strongly recommended.
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --pre-commit --staged --redact --no-banner . || fail=1
+else
+  echo "  zs: gitleaks not installed - staged secret scan skipped (winget install Gitleaks.Gitleaks)"
+fi
+
+# The staged-file steps above need GIT_INDEX_FILE; the gate does not, and its
+# checks spawn git against temp repos. Scrub GIT_* for it alone (a subshell,
+# so a chained pre-commit.local keeps the environment git gave it).
+( unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_COMMON_DIR
+  cd "$(git rev-parse --show-toplevel)" && node scripts/zs/gate.mjs fast ) || fail=1
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "  Commit blocked by zippy-standards. Fix the above, or use"
+  echo "  'git commit --no-verify' ONLY with a written reason in the message."
+  exit 1
+fi
+
+# A hook this repo had before zippy-standards was installed runs after ours.
+if [ -x ".githooks/pre-commit.local" ]; then
+  ".githooks/pre-commit.local" "$@" || exit 1
+fi

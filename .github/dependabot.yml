@@ -1,0 +1,29 @@
+# zippy-standards (ZS-106): weekly updates, and a 7-day cooldown so a
+# compromised release has time to be caught before we adopt it. The
+# github-actions entry keeps pinned action SHAs current.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions-minor-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+    groups:
+      npm-minor-patch:
+        update-types: [minor, patch]

@@ -1,0 +1,17 @@
+# Discord pilot setup
+
+Use a Discord server you own or manage for the first live test. This setup does not grant permission to install the bot in Kiro or inspect Kiro members' messages. See the [test-server checklist](test-server-checklist.md).
+
+1. Install Node.js 24.17 or newer (the current [discord.js package guidance](https://discord.js.org/docs)) and create a Discord application and bot in the [Developer Portal](https://discord.com/developers/applications). Keep the token out of source control and issue trackers.
+2. Enable **Message Content Intent** in the Bot settings. For a larger public app, recheck Discord's [privileged intent review guidance](https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps).
+3. Create a private moderator review channel. Grant only moderators and the bot access. Create a separate public submission destination if `/submit` is desired.
+4. Invite the app to a test server with `bot` and `applications.commands` scopes. Give it View Channels, Send Messages, Read Message History, and Manage Messages only in channels it will moderate; give the staff channel Send Messages and Embed Links. Channel and role hierarchy can affect what the bot can delete. Do not use Administrator.
+5. Copy `.env.example` to `.env`. Set `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID`, `MOD_REVIEW_CHANNEL_ID`, and optionally `SUBMISSION_CHANNEL_ID`. Set `MONITORED_CHANNEL_IDS` to an explicit comma-separated allowlist; an allowed channel's threads are included. An empty list monitors no ordinary messages.
+6. Run `npm ci`, `npm test`, `npm run evaluate`, `npm start`. The bot registers `/submit` as a guild command when both channels are set.
+7. With `MODERATION_MODE=observe`, send synthetic test messages in the test server and check that no case, deletion, or repost occurs. Then set `review`, test moderator permission checks and button resolution. Turn on `hold` only after completing the [calibration plan](jev-research.md).
+
+`CLASSIFIER_PROVIDER=local` is the default and sends no text to an external classifier. To try Jev, set `CLASSIFIER_PROVIDER=jev` and `TYPESAFE_API_KEY` locally, review the [privacy note](privacy-and-operations.md), and get server approval for this data flow. The code uses the official TypeSafe endpoint and a 1.8-second timeout.
+
+For experimental local integration, run the **separate** Zippy Decisions 0.2 service on the same machine and set `CLASSIFIER_PROVIDER=zippy_decisions`. The adapter accepts only a loopback `http://127.0.0.1` or `localhost` `/v1/systemone` endpoint, configured with `ZIPPY_DECISIONS_URL`. The service's default uniform backend is only a plumbing baseline; select and validate a real local backend before judging classification. Keep the bot in `observe` mode for this integration. No source or model weights from that project are bundled here.
+
+Native Discord AutoMod should be configured in Server Settings for spam/mention protection and any vetted custom keyword rules. This bot does not change AutoMod settings. [Discord AutoMod FAQ](https://support.discord.com/hc/en-us/articles/4421269296535-AutoMod-FAQ).

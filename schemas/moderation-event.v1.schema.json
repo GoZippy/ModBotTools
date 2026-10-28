@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:modbot:moderation-event:v1",
+  "title": "ModBot normalized moderation event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["spec", "id", "guildId", "channelId", "authorId", "content", "surface", "mentionCount", "attachmentCount", "createdAt"],
+  "properties": {
+    "spec": { "const": "modbot.event.v1" },
+    "id": { "type": "string", "minLength": 1 },
+    "guildId": { "type": "string", "minLength": 1 },
+    "channelId": { "type": "string", "minLength": 1 },
+    "authorId": { "type": "string", "minLength": 1 },
+    "content": { "type": "string" },
+    "surface": { "enum": ["text", "thread", "voice_text", "submission", "voice_transcript"] },
+    "mentionCount": { "type": "integer", "minimum": 0 },
+    "attachmentCount": { "type": "integer", "minimum": 0 },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}

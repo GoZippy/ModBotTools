@@ -1,0 +1,12 @@
+#!/bin/sh
+# zippy-standards commit-msg — ZS-011 conventional subject, ZS-012 the
+# committing human is the author (no AI co-author / generated-by trailers).
+# GIT_* is scrubbed for the check alone (a subshell): it may spawn git, and a
+# GIT_DIR from a linked worktree would send that git at the shared repository.
+( unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_COMMON_DIR
+  node scripts/zs/commit-msg.mjs "$1" ) || exit 1
+
+# A hook this repo had before zippy-standards was installed runs after ours.
+if [ -x ".githooks/commit-msg.local" ]; then
+  ".githooks/commit-msg.local" "$@" || exit 1
+fi
