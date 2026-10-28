@@ -21,7 +21,7 @@ const valid = `## Why it matters
 **Security-sensitive change:** No auth, moderation action, or credential change.
 **Licensing rights:** No third-party code or assets are included.
 ## AI assistance
-- [x] An agent did most of the work under my supervision; I verified the tests myself
+- [x] An agent did most of the work; maintainer verification status is stated under Tests
 Tools / models used: Codex
 `;
 

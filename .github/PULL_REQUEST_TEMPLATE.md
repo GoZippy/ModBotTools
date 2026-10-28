@@ -80,6 +80,6 @@ None yet
 - [ ] None
 - [ ] AI suggested or reviewed; I wrote the code
 - [ ] AI drafted code that I reviewed line by line and can explain
-- [ ] An agent did most of the work under my supervision; I verified the tests myself
+- [ ] An agent did most of the work; maintainer verification status is stated under Tests
 
 Tools / models used:
