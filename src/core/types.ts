@@ -51,6 +51,7 @@ export interface ReviewCase {
   status: CaseStatus;
   decision: 'flag' | 'hold' | 'submission';
   reasons: string[];
+  routeId?: string;
   provider: string;
   model: string;
   // Content is retained only for a held message or an opted-in submission.

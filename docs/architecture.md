@@ -6,7 +6,8 @@ This is a small deployment unit with clean seams rather than an immediate micros
 flowchart LR
   Discord[Discord Gateway or slash command] --> Adapter[Discord adapter]
   Adapter --> Event[ModerationEvent]
-  Event --> Classifier[Classifier interface]
+  Event --> Route[Ordered workflow route]
+  Route --> Classifier[Classifier interface]
   Classifier --> Policy[Deterministic policy]
   Policy -->|allow| End[No action]
   Policy -->|flag| Cases[Review case]
@@ -24,12 +25,13 @@ The `/submit` path creates a review case without a public original. Only approva
 | Boundary | Contract | Owner |
 | --- | --- | --- |
 | Discord input | `ModerationEvent` with surface, IDs, text, counts | Discord adapter |
-| Classifier | `Classifier.classify(event) → Classification` | Local/Jev/future provider |
+| Route | `selectRoute(routes, trigger, channel, surface) → provider, mode` | Instance operator |
+| Classifier | `Classifier.classify(event) → Classification` | Local/Jev/Laya/local System One provider |
 | Decision | `decide(event, classification, mode) → PolicyResult` | Bot policy |
-| Review | `ReviewCase` with status, expiry, reviewer, optional text | Case store |
+| Review | `ReviewCase` with route/provider/model, status, expiry, reviewer, optional text | Case store |
 | Discord action | Staff alert, delete, or approved repost | Discord adapter |
 
-The versioned [matrix](../schemas/moderation-matrix.v1.json) holds questions and thresholds; [its schema](../schemas/moderation-matrix.v1.schema.json) and the [event schema](../schemas/moderation-event.v1.schema.json) are available to other tools. The normalized event keeps Discord specifics at the edge. Provider implementations do not get bot tokens. Typed-decision adapters send redacted text, surface, and counts; they do not send Discord user IDs. Default `observe` never deletes or creates review cases.
+The versioned [matrix](../schemas/moderation-matrix.v1.json) holds questions and thresholds; [its schema](../schemas/moderation-matrix.v1.schema.json), [route schema](../schemas/classifier-routes.v1.schema.json), and [event schema](../schemas/moderation-event.v1.schema.json) are available to other tools. The normalized event keeps Discord specifics at the edge. Provider implementations do not get bot tokens. Typed-decision adapters send redacted text, surface, and counts; they do not send Discord user IDs. Default `observe` never deletes or creates review cases. See [classifier integrations](classifier-integrations.md) and [permissions](permissions-and-acl.md).
 
 ## Current operating limits
 

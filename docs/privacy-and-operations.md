@@ -3,7 +3,7 @@
 ## Data flow
 
 - Local classifier: only messages in the configured channel allowlist are processed in memory. Observation mode stores no cases and does not log message text or IDs.
-- Jev: sends redacted text, surface, mention count, and attachment count to TypeSafe. The regular expressions remove obvious email addresses, phone numbers, and Discord mentions; they cannot guarantee removal of all private data. External classification is opt-in and should be announced to the server.
+- Jev and Laya Studio: send redacted text, surface, mention count, and attachment count to their respective hosted services when selected for a workflow. The regular expressions remove obvious email addresses, phone numbers, and Discord mentions; they cannot guarantee removal of all private data. External classification is opt-in and should be announced to the server. `/submit` text is also classified by its selected route before being queued for human review.
 - Review/hold: a local case file contains IDs, reason, provider/model, and timestamps. `hold` and `/submit` retain full text for 24 hours so a moderator can inspect and approve it. The private staff channel receives the full text in an embed; flagged cases receive a short redacted preview.
 - Repost: approval makes a new bot-authored message with an author attribution line. Mentions and link embeds are suppressed. The original message is not restored.
 

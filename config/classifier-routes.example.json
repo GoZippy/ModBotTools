@@ -1,0 +1,9 @@
+{
+  "schema_version": "modbot.routes.v1",
+  "routes": [
+    { "id": "chat_created", "trigger": "message_create", "channelIds": [], "surfaces": ["text", "thread"], "provider": "local", "mode": "observe" },
+    { "id": "chat_edited", "trigger": "message_update", "channelIds": [], "surfaces": ["text", "thread"], "provider": "local", "mode": "observe" },
+    { "id": "voice_text", "trigger": "message_create", "channelIds": [], "surfaces": ["voice_text"], "provider": "local", "mode": "observe" },
+    { "id": "opt_in_submission", "trigger": "submission", "channelIds": [], "surfaces": ["submission"], "provider": "local", "mode": "review" }
+  ]
+}

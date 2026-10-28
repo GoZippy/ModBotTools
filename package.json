@@ -9,7 +9,8 @@
     "start": "node --env-file-if-exists=.env dist/index.js",
     "test": "npm run build && node --test dist/*.test.js dist/**/*.test.js",
     "demo": "npm run build && node dist/demo.js",
-    "evaluate": "npm run build && node --env-file-if-exists=.env dist/evaluate.js fixtures/eval.sample.jsonl"
+    "evaluate": "npm run build && node dist/evaluate.js fixtures/eval.sample.jsonl",
+    "validate:routes": "npm run build && node dist/validate-routes.js"
   },
   "dependencies": { "discord.js": "14.27.0" },
   "devDependencies": { "@types/node": "24.9.1", "typescript": "5.9.3" },
