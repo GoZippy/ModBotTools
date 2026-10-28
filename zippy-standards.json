@@ -392,14 +392,14 @@
     ],
     "gates": {
       "fast": [
-        "npm run --if-present lint"
+        "npm run lint"
       ],
       "test": [
-        "npm test --if-present"
+        "npm test",
+        "npm run evaluate:gate"
       ],
       "full": [
-        "npm test --if-present",
-        "npm run --if-present build"
+        "npm audit --audit-level=high"
       ]
     },
     "aiDisclosure": "pr-template",

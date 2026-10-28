@@ -14,7 +14,9 @@
 
 ## Why it matters
 
-<!-- The problem, and who hits it. Link the issue. -->
+**Issue or rationale:** <!-- Link #123, or write "No issue:" and explain why. -->
+
+<!-- State the problem and who is affected. Do not include real member messages or IDs. -->
 
 ## Not a goal
 
@@ -26,7 +28,35 @@
 
 ## Tests
 
-<!-- What you ran, on which OS, and what proves the change. A UI change carries a screenshot. -->
+**OS and Node:** <!-- Example: Windows 11, Node 24.17.0; include a second OS if tested. -->
+
+**Commands and results:** <!-- Exact commands, pass/fail counts, and what was skipped. A UI change includes safe screenshots. -->
+
+**Synthetic evaluation:** <!-- Count, false holds, other mismatches; or why this PR cannot change classification. -->
+
+**Independent review:** <!-- Who re-ran the checks, or "Pending: @reviewer". Author-run checks alone are not verification. -->
+
+## Risk and safety
+
+**Discord surface and mode:** <!-- Ordinary post-publication messages, /submit, AutoMod, voice, or no runtime change; name observe/review/hold. -->
+
+**False-positive impact:** <!-- Which messages or members could be affected and how staff can recover. -->
+
+**Permissions and data:** <!-- New Discord permissions, secrets, logs, stored data, retention, or "No change because ...". -->
+
+**External inference:** <!-- Local only, optional provider and data sent, or no change. -->
+
+**Rollback:** <!-- Exact config/commit rollback; do not suggest deleting case data. -->
+
+## Human gates
+
+**Live Discord and member data:** <!-- Not requested, or link the server owner's authorization. -->
+
+**Public release:** <!-- Not requested, or link the owner's tracked-file privacy review. -->
+
+**Security-sensitive change:** <!-- Name affected auth, moderation actions, secrets, workflows, or explain no change. -->
+
+**Licensing rights:** <!-- Confirm rights for code/assets and whether commercial relicensing needs a separate agreement. -->
 
 ## Compatibility
 
