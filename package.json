@@ -12,6 +12,6 @@
     "evaluate": "npm run build && node --env-file-if-exists=.env dist/evaluate.js fixtures/eval.sample.jsonl"
   },
   "dependencies": { "discord.js": "14.27.0" },
-  "devDependencies": { "@types/node": "24.9.1", "typescript": "5.9.3" },
+  "devDependencies": { "@types/node": "26.6.5", "typescript": "5.9.3" },
   "license": "MIT"
 }
