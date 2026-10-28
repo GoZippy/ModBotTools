@@ -8,6 +8,6 @@ Thank you for helping make community moderation more reviewable and useful.
 4. Run `npm ci`, `npm test`, and `npm run evaluate` before a pull request.
 5. Explain false-positive risks, privacy effects, permissions, and rollback in the pull request.
 
-For security concerns, avoid public disclosure of working exploit details; contact the maintainers privately. A dedicated security contact will be published before broad deployment.
+For security concerns, avoid public disclosure of working exploit details; use the private channel in [SECURITY.md](SECURITY.md).
 
 The repository's current license permits noncommercial use and contributions. Before a code contribution is merged, maintainers must confirm they have the rights needed to include it in separately licensed commercial distributions. A commit sign-off confirms provenance; it does not transfer copyright or grant commercial relicensing rights. Maintainers may ask for a separate contributor agreement. Issue reports and design discussions remain welcome without one.

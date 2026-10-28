@@ -63,12 +63,30 @@ export class JevClassifier extends TypedDecisionClassifier {
   }
 }
 
+export class LayaStudioClassifier extends TypedDecisionClassifier {
+  constructor(key: string, model = 'typed-decisions', endpoint = 'https://api.laya.studio/v1/systemone') {
+    if (!key) throw new Error('LAYA_API_KEY is required for Laya Studio');
+    super('laya_studio', key, model, endpoint);
+  }
+}
+
+function requireLoopback(endpoint: string): void {
+  const url = new URL(endpoint);
+  if (url.protocol !== 'http:' || !['127.0.0.1', 'localhost'].includes(url.hostname) || url.username || url.password || url.pathname !== '/v1/systemone' || url.search || url.hash) {
+    throw new Error('System One endpoint must be loopback /v1/systemone');
+  }
+}
+
 export class ZippyDecisionsClassifier extends TypedDecisionClassifier {
   constructor(endpoint = 'http://127.0.0.1:8766/v1/systemone') {
-    const url = new URL(endpoint);
-    if (url.protocol !== 'http:' || !['127.0.0.1', 'localhost'].includes(url.hostname) || url.username || url.password || url.pathname !== '/v1/systemone') {
-      throw new Error('Zippy Decisions endpoint must be loopback /v1/systemone');
-    }
+    requireLoopback(endpoint);
     super('zippy_decisions', undefined, 'local', endpoint);
+  }
+}
+
+export class LocalSystemOneClassifier extends TypedDecisionClassifier {
+  constructor(endpoint = 'http://127.0.0.1:8767/v1/systemone', model = 'local') {
+    requireLoopback(endpoint);
+    super('systemone_local', undefined, model, endpoint);
   }
 }

@@ -5,6 +5,7 @@ data/
 coverage/
 *.log
 docs/internal/
+config/*.local.json
 
 # zippy-standards v2.0.3 — tool-generated agent files and local secrets.
 .autoclaw/

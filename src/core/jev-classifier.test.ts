@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { JevClassifier, ZippyDecisionsClassifier } from './jev-classifier.js';
+import { JevClassifier, LayaStudioClassifier, LocalSystemOneClassifier, ZippyDecisionsClassifier } from './jev-classifier.js';
 import type { ModerationEvent } from './types.js';
 
 test('Jev adapter sends redacted state and reads typed answers', async () => {
@@ -33,6 +33,13 @@ test('Jev adapter sends redacted state and reads typed answers', async () => {
     const local = await new ZippyDecisionsClassifier(`http://127.0.0.1:${address.port}/v1/systemone`).classify(event);
     assert.equal(local.provider, 'zippy_decisions');
     assert.equal(request.model, 'local');
+    const laya = await new LayaStudioClassifier('test-key', 'typed-decisions', `http://127.0.0.1:${address.port}/v1/systemone`).classify(event);
+    assert.equal(laya.provider, 'laya_studio');
+    assert.equal(request.model, 'typed-decisions');
+    const generic = await new LocalSystemOneClassifier(`http://127.0.0.1:${address.port}/v1/systemone`, 'community-v1').classify(event);
+    assert.equal(generic.provider, 'systemone_local');
+    assert.equal(request.model, 'community-v1');
+    assert.throws(() => new LocalSystemOneClassifier('http://192.0.2.1/v1/systemone'), /loopback/);
     assert.throws(() => new ZippyDecisionsClassifier('https://example.com/v1/systemone'), /loopback/);
   } finally { server.close(); await once(server, 'close'); }
 });
