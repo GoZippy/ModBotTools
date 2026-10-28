@@ -1,0 +1,26 @@
+{
+  "schema_version": "modbot.matrix.v1",
+  "name": "community-text-triage",
+  "description": "Independent semantic signals and deterministic human-review gates. Values require local calibration.",
+  "questions": {
+    "spam": { "type": "noul", "instructions": "Is this unsolicited repetitive promotion, bulk posting, or disruptive mention spam? Ordinary technical links and help requests are not spam." },
+    "scam": { "type": "noul", "instructions": "Does this message attempt a phishing, credential theft, fake giveaway, or financial scam? A discussion about scams is not itself a scam." },
+    "abuse": { "type": "noul", "instructions": "Is this targeted harassment, a threat, or hateful abuse directed at a person or group? Quoted reports and criticism of software are not abuse." },
+    "privacy": { "type": "noul", "instructions": "Does this message disclose another person's private identifying information, such as an address or personal contact details? Public documentation and the author's own contact details do not qualify." },
+    "severity": { "type": "score", "instructions": "Rate the apparent moderation concern in the message, regardless of category.", "criteria": ["0: ordinary conversation", "1: possible policy concern needing context", "2: clear disruptive or harmful content", "3: severe or urgent harm"] },
+    "topic": { "type": "choice", "instructions": "Which topic best describes this message?", "criteria": { "technical": "Software, tools, troubleshooting, or technical discussion", "community": "Community logistics, events, introductions, or ordinary chat", "other": "Anything else or unclear" } }
+  },
+  "thresholds": {
+    "flag_signal": 0.7,
+    "flag_severity_score": 2,
+    "flag_severity_confidence": 0.8,
+    "hold_spam": 0.98,
+    "hold_scam": 0.98,
+    "hold_max_characters": 1800
+  },
+  "actions": {
+    "allow": "No bot action",
+    "flag": "Private moderator case; original remains visible",
+    "hold": "Delete already-posted text and queue bot-attributed repost for moderator approval"
+  }
+}

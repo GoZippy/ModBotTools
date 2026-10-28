@@ -1,0 +1,33 @@
+#!/bin/sh
+# zippy-standards pre-push — the test stage (ZS-020), plus the add-only and
+# changelog-immutability checks (ZS-005, ZS-033) against the default branch.
+fail=0
+# git passes the refs being pushed on stdin; keep them for a chained hook.
+refs=$(cat)
+
+# Scrub GIT_* before anything spawns git: a push from a linked worktree sets
+# GIT_DIR (and can set GIT_WORK_TREE, GIT_INDEX_FILE, GIT_PREFIX,
+# GIT_COMMON_DIR), which a `git -C <other path>` call or a fixture `git init`
+# would inherit and act on the shared repository (core.bare = true on the
+# primary). Then run from the root of the checkout being pushed.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_COMMON_DIR
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+node scripts/zs/gate.mjs test || fail=1
+
+base=$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null)
+if [ -n "$base" ]; then
+  node scripts/zs/hygiene.mjs --base "$base" || fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "  Push blocked by zippy-standards. Fix the above, or use"
+  echo "  'git push --no-verify' ONLY when you can say why in the PR."
+  exit 1
+fi
+
+# A hook this repo had before zippy-standards was installed runs after ours.
+if [ -x ".githooks/pre-push.local" ]; then
+  printf '%s\n' "$refs" | ".githooks/pre-push.local" "$@" || exit 1
+fi

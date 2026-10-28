@@ -1,0 +1,409 @@
+{
+  "standard": "zippy-standards",
+  "version": "2.0.3",
+  "_comment": "Kit manifest. The installer copies everything except projectDefaults into each repo as zippy-standards.json; a repo keeps its own \"project\" block across upgrades, seeded from projectDefaults. Change the standard here, never in a repo.",
+  "canonical": "AGENTS.md",
+  "pointerMaxBytes": 4096,
+  "legacy": {
+    "manifests": [
+      "agent-standard.json",
+      ".agent-standard.json"
+    ],
+    "markers": [
+      "zippy-agent-standard"
+    ],
+    "paths": [
+      "scripts/check-agent-pointers.mjs",
+      ".github/workflows/agent-standard.yml"
+    ]
+  },
+  "tiers": {
+    "private": {
+      "description": "Default for every repo. No billed CI: local hooks, local gate, nightly runner, optional self-hosted runner.",
+      "requiredFiles": [
+        "AGENTS.md",
+        ".gitattributes",
+        ".gitignore",
+        "zippy-standards.json",
+        ".githooks/pre-commit",
+        ".githooks/commit-msg",
+        ".githooks/pre-push"
+      ],
+      "workflows": [],
+      "hostedRunnersAllowed": false,
+      "optionalWorkflows": [
+        "zs-selfhosted.yml"
+      ],
+      "selfHostedRunnersAllowed": true
+    },
+    "public": {
+      "description": "Anything published. Free hosted CI, security features, releases with provenance.",
+      "inherits": "private",
+      "requiredFiles": [
+        "LICENSE",
+        "SECURITY.md",
+        "CONTRIBUTING.md",
+        "CODE_OF_CONDUCT.md",
+        "AI_POLICY.md",
+        ".github/PULL_REQUEST_TEMPLATE.md",
+        ".github/ISSUE_TEMPLATE/config.yml",
+        ".github/dependabot.yml",
+        ".github/zs-review/contract.md"
+      ],
+      "workflows": [
+        "zs-ci.yml",
+        "zs-ai-review.yml",
+        "zs-supply-chain.yml"
+      ],
+      "hostedRunnersAllowed": true,
+      "selfHostedRunnersAllowed": false,
+      "requireSignoff": true,
+      "optionalWorkflows": [
+        "zs-release-python.yml",
+        "zs-release-npm.yml"
+      ]
+    },
+    "public-large": {
+      "description": "Public and multi-contributor. Adds ownership and queueing once volume needs it.",
+      "inherits": "public",
+      "requiredFiles": [
+        ".github/CODEOWNERS"
+      ],
+      "workflows": [],
+      "hostedRunnersAllowed": true,
+      "selfHostedRunnersAllowed": false,
+      "requireSignoff": true
+    }
+  },
+  "profiles": {
+    "python": {
+      "detect": [
+        "pyproject.toml",
+        "setup.py",
+        "setup.cfg",
+        "requirements.txt"
+      ],
+      "gates": {
+        "fast": [
+          "uvx ruff check --select E9,F63,F7,F82 ."
+        ],
+        "test": [],
+        "full": []
+      },
+      "note": "Starts at syntax errors and undefined names only, which every repo can pass on day one. Tighten with a ratchet, then add your pytest command to test and full."
+    },
+    "node": {
+      "detect": [
+        "package.json"
+      ],
+      "gates": {
+        "fast": [
+          "npm run --if-present lint"
+        ],
+        "test": [
+          "npm test --if-present"
+        ],
+        "full": [
+          "npm test --if-present",
+          "npm run --if-present build"
+        ]
+      }
+    },
+    "rust": {
+      "detect": [
+        "Cargo.toml"
+      ],
+      "gates": {
+        "fast": [
+          "cargo fmt --check"
+        ],
+        "test": [
+          "cargo test"
+        ],
+        "full": [
+          "cargo clippy --all-targets -- -D warnings",
+          "cargo test --all-features"
+        ]
+      }
+    },
+    "go": {
+      "detect": [
+        "go.mod"
+      ],
+      "gates": {
+        "fast": [
+          "go vet ./..."
+        ],
+        "test": [
+          "go test ./..."
+        ],
+        "full": [
+          "go test -race ./..."
+        ]
+      }
+    },
+    "dart": {
+      "detect": [
+        "pubspec.yaml"
+      ],
+      "gates": {
+        "fast": [
+          "dart analyze"
+        ],
+        "test": [
+          "dart test"
+        ],
+        "full": [
+          "dart test"
+        ]
+      }
+    }
+  },
+  "commits": {
+    "types": [
+      "feat",
+      "fix",
+      "docs",
+      "style",
+      "refactor",
+      "perf",
+      "test",
+      "chore",
+      "ci",
+      "build",
+      "revert"
+    ],
+    "subjectMax": 72,
+    "bannedTrailers": [
+      "^Co-authored-by:.*(claude|anthropic|copilot|openai|chatgpt|gpt|gemini|codex|kiro|cursor|windsurf|cline|kilo|devin|aider|noreply@(anthropic|openai).com)",
+      "^(Generated|Assisted|Created|Written)-(by|with):",
+      "^🤖 Generated with",
+      "^Claude-Session:",
+      "^Session-Id:"
+    ],
+    "_bannedTrailersNote": "The committing human is the sole author. AI assistance is disclosed per project.aiDisclosure: \"pr-template\" (default; a checkbox in the PR body) or \"trailer\" (allows Assisted-by: AGENT:MODEL, the Linux kernel convention)."
+  },
+  "pr": {
+    "requiredHeadings": [
+      "## Goal",
+      "## Why it matters",
+      "## Not a goal",
+      "## What changed",
+      "## Tests",
+      "## Compatibility",
+      "## Review dispositions",
+      "## AI assistance"
+    ],
+    "goalLine": "**Goal:**"
+  },
+  "checks": {
+    "pointers": true,
+    "hygiene": true,
+    "commitMsg": true,
+    "prBody": true,
+    "traceability": "auto",
+    "noBlindCommit": true,
+    "blindCommitThreshold": 40
+  },
+  "gitignoreAdditions": [
+    ".autoclaw/",
+    ".claude/rules/",
+    ".clinerules/",
+    ".kiro/",
+    ".kilo/",
+    ".kilocodemodes",
+    ".qodo/"
+  ],
+  "harnesses": [
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "marker": ".claude",
+      "pointer": "CLAUDE.md"
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "marker": ".cursor",
+      "pointer": ".cursor/rules/00-constitution.mdc",
+      "format": "mdc"
+    },
+    {
+      "id": "copilot",
+      "name": "GitHub Copilot",
+      "marker": null,
+      "pointer": ".github/copilot-instructions.md",
+      "note": "marker is null on purpose: .github exists in nearly every repo and Copilot is often enabled account-wide with no repo marker, so the pointer is always installed."
+    },
+    {
+      "id": "kilocode",
+      "name": "Kilo Code",
+      "marker": ".kilocode",
+      "pointer": ".kilocode/rules/00-constitution.md",
+      "altMarkers": [
+        ".kilo"
+      ],
+      "note": "Kilo Code writes .kilocode/ and, in newer builds, .kilo/. Both count as present."
+    },
+    {
+      "id": "continue",
+      "name": "Continue",
+      "marker": ".continue",
+      "pointer": ".continue/rules/00-constitution.md"
+    },
+    {
+      "id": "windsurf",
+      "name": "Windsurf",
+      "marker": ".windsurf",
+      "pointer": ".windsurfrules"
+    },
+    {
+      "id": "aider",
+      "name": "Aider",
+      "marker": null,
+      "pointer": "CONVENTIONS.md"
+    },
+    {
+      "id": "cline",
+      "name": "Cline",
+      "marker": ".clinerules",
+      "pointer": null,
+      "generated": true,
+      "note": "AutoClaw regenerates .clinerules/. Do not write pointers there; AGENTS.md precedence section governs instead."
+    },
+    {
+      "id": "kiro",
+      "name": "Kiro",
+      "marker": ".kiro",
+      "pointer": null,
+      "generated": true,
+      "note": "AutoClaw regenerates .kiro/steering/."
+    },
+    {
+      "id": "qodo",
+      "name": "Qodo",
+      "marker": ".qodo",
+      "pointer": null,
+      "generated": true
+    },
+    {
+      "id": "codex",
+      "name": "OpenAI Codex",
+      "marker": ".codex",
+      "pointer": null,
+      "note": "Codex reads AGENTS.md natively. No pointer needed - that is the whole point of the canonical filename."
+    },
+    {
+      "id": "antigravity",
+      "name": "Google Antigravity",
+      "marker": ".antigravity",
+      "pointer": null,
+      "generated": true,
+      "note": "IDE-managed; observed writing into project folders on com10."
+    },
+    {
+      "id": "amp",
+      "name": "Amp",
+      "marker": ".amp",
+      "pointer": null,
+      "generated": true
+    },
+    {
+      "id": "autoclaw",
+      "name": "AutoClaw",
+      "marker": ".autoclaw",
+      "pointer": null,
+      "generated": true,
+      "note": "AutoClaw orchestrator state and generated rules. Gitignored; AGENTS.md precedence governs it."
+    }
+  ],
+  "knownAgentDirs": [
+    ".agents",
+    ".aider",
+    ".amp",
+    ".antigravity",
+    ".autoclaw",
+    ".claude",
+    ".clinerules",
+    ".cline",
+    ".codegpt",
+    ".codeium",
+    ".codex",
+    ".cody",
+    ".continue",
+    ".continuum",
+    ".copilot",
+    ".cursor",
+    ".gemini",
+    ".goose",
+    ".kilo",
+    ".kilocode",
+    ".kiro",
+    ".openclaw",
+    ".openhands",
+    ".qodo",
+    ".roo",
+    ".securecoder",
+    ".sentinel",
+    ".sourcegraph",
+    ".tabnine",
+    ".twinny",
+    ".void-editor",
+    ".voidspec",
+    ".windsurf",
+    ".zed",
+    ".zippy",
+    ".zippy-mesh",
+    ".zippycodesaudit",
+    ".zippyflow"
+  ],
+  "benignDirs": [
+    ".git",
+    ".github",
+    ".gitlab",
+    ".vscode",
+    ".idea",
+    ".husky",
+    ".githooks",
+    ".yarn",
+    ".pnpm",
+    ".venv",
+    ".next",
+    ".nuxt",
+    ".cache",
+    ".turbo",
+    ".changeset",
+    ".devcontainer",
+    ".circleci",
+    ".azure",
+    ".aws",
+    ".docker",
+    ".config",
+    ".bin",
+    ".output",
+    ".svelte-kit",
+    ".zs-cache"
+  ],
+  "project": {
+    "name": "ModBotTools",
+    "tier": "public",
+    "profiles": [
+      "node"
+    ],
+    "gates": {
+      "fast": [
+        "npm run --if-present lint"
+      ],
+      "test": [
+        "npm test --if-present"
+      ],
+      "full": [
+        "npm test --if-present",
+        "npm run --if-present build"
+      ]
+    },
+    "aiDisclosure": "pr-template",
+    "ratchets": [],
+    "extraWorkflows": []
+  }
+}

@@ -1,0 +1,6 @@
+{"text":"How do I fix this TypeScript build error?","expected":"allow"}
+{"text":"Free Nitro! Verify your wallet now.","expected":"hold"}
+{"text":"I will dox you.","expected":"flag"}
+{"text":"See my email person@example.com for the docs.","expected":"flag"}
+{"text":"Project update: release notes are ready.","expected":"allow"}
+{"text":"Check these links: https://a.test https://b.test https://c.test https://d.test","expected":"flag"}

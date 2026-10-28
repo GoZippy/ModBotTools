@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.env
+data/
+coverage/
+*.log
+docs/internal/
+
+# zippy-standards v2.0.3 — tool-generated agent files and local secrets.
+.autoclaw/
+.claude/rules/
+.clinerules/
+.kiro/
+.kilo/
+.kilocodemodes
+.qodo/
+.env.*
+!.env.example
+.zs-cache/

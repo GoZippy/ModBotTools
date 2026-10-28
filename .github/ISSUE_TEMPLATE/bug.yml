@@ -1,0 +1,47 @@
+name: Bug report
+description: Something does not work the way the docs say it should.
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security problem? Stop — report it privately (see SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations: { required: true }
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The smallest steps that show the problem.
+      placeholder: |
+        1.
+        2.
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations: { required: true }
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows, macOS, Linux, Android, iOS, Other]
+    validations: { required: true }
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Remove tokens, keys and personal data first.
+      render: text
+  - type: checkboxes
+    id: ai
+    attributes:
+      label: AI assistance
+      options:
+        - label: I reproduced this myself; if an AI tool helped find or describe it, I have said so above.
+          required: true
