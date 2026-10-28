@@ -18,7 +18,8 @@ The source, [Apache-licensed schemas](../schemas/README.md), synthetic fixture, 
 
 | Priority | Task | Acceptance evidence |
 | --- | --- | --- |
-| High | Prevent duplicate and stale edit cases | Tests for repeated create/update events and a newer edit arriving during classification |
+| High | Prevent duplicate cases and close the last stale-edit race | Tests for repeated create/update events and an edit arriving after the final fetch but before deletion; the current forced-refresh guard is a partial safeguard |
+| High | Clean up staff cards when cases expire | Store staff message IDs and remove full-text embeds under the configured retention policy; verify restart and API-failure behavior |
 | High | Make case creation and staff alerts recoverable | Restart/failure drill with a durable case and one clear moderator outcome |
 | High | Build a consented, redacted evaluation protocol | Split calibration and holdout sets; report false holds, recall, review volume, latency, and error rate without publishing member text |
 | Medium | Document a reproducible local Laya deployment | Pinned model/runtime, CPU and GPU measurements, memory use, fail-safe behavior |

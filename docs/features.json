@@ -24,7 +24,7 @@
       "source": "src/core/case-store.ts, src/discord-bot.ts",
       "acceptance": "Authorized staff can resolve a case once; a held post is bot-attributed after approval",
       "evidence": "src/core/case-store.test.ts, src/core/access.test.ts",
-      "remaining": "Failure and restart drills; durable audit log; stale edit handling"
+      "remaining": "Failure and restart drills; durable audit log; duplicate edit cases and final delete race"
     },
     {
       "id": "offline-provider-evaluation",

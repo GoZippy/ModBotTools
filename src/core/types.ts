@@ -56,6 +56,7 @@ export interface ReviewCase {
   model: string;
   // Content is retained only for a held message or an opted-in submission.
   content?: string;
+  reviewReady?: boolean;
   publishedMessageId?: string;
   reviewerId?: string;
   reviewedAt?: string;

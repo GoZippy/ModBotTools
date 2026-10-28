@@ -6,7 +6,9 @@ import {
 import type { Config } from './config.js';
 import { CaseStore } from './core/case-store.js';
 import { canConfigure, canReview, canViewConfig, type Actor, type Permission } from './core/access.js';
+import { actIfCurrent, stillCurrent } from './core/event-version.js';
 import { decide } from './core/policy.js';
+import { canApproveCase } from './core/review-readiness.js';
 import { preview } from './core/redact.js';
 import { selectRoute, type RouteSelection, type Trigger } from './core/routing.js';
 import type { Classifier, ModerationEvent, ReviewCase, Surface } from './core/types.js';
@@ -47,7 +49,7 @@ export function createBot(config: Config, classifierFor: (route: RouteSelection)
       roleIds: new Set(roles ? Array.isArray(roles) ? roles : [...roles.cache.keys()] : []) };
   }
 
-  async function sendReview(item: ReviewCase, excerpt?: string): Promise<Message> {
+  async function sendReview(item: ReviewCase, excerpt?: string, includeContent = true): Promise<Message> {
     if (!config.reviewChannelId) throw new Error('Review channel is not configured');
     const channel = await client.channels.fetch(config.reviewChannelId);
     if (!channel?.isSendable() || !('guildId' in channel) || channel.guildId !== config.guildId) throw new Error('Review channel is not a sendable channel in the configured server');
@@ -58,11 +60,11 @@ export function createBot(config: Config, classifierFor: (route: RouteSelection)
     if (publicPermissions.has(PermissionFlagsBits.ViewChannel)) {
       throw new Error('Review channel is visible to everyone; refusing to send case content');
     }
-    const detail = excerpt ? `\nPreview: ${excerpt}` : '';
+    const detail = excerpt ? `\nPreview: ${excerpt}` : includeContent ? '' : '\nText pending until the hold succeeds.';
     return await channel.send({
-      content: `Case ${item.id}\nType: ${item.decision} | ${item.surface}\nRoute: ${item.routeId ?? 'default'}\nReasons: ${item.reasons.join(', ') || 'manual submission'}\nAuthor: <@${item.authorId}> | Channel: <#${item.channelId}>${detail}\nExpires in 24 hours.`,
-      allowedMentions: { parse: [] }, components: [buttons(item.id)],
-      embeds: item.content ? [new EmbedBuilder().setTitle('Full text for review').setDescription(escapeMarkdown(item.content))] : []
+      content: `Case ${item.id}\nType: ${item.decision} | ${item.surface}\nRoute: ${item.routeId ?? 'default'}\nReasons: ${item.reasons.join(', ') || 'manual submission'}\nAuthor: <@${item.authorId}> | Channel: <#${item.channelId}>${detail}\nCase expires in 24 hours; staff card retention follows server policy.`,
+      allowedMentions: { parse: [] }, components: includeContent ? [buttons(item.id)] : [],
+      embeds: includeContent && item.content ? [new EmbedBuilder().setTitle('Full text for review').setDescription(escapeMarkdown(item.content))] : []
     });
   }
 
@@ -90,6 +92,8 @@ export function createBot(config: Config, classifierFor: (route: RouteSelection)
       console.info(`Observation: ${policy.reasons.join(', ')} on ${event.surface} via ${route.id}`);
       return;
     }
+    // Skip this classification when the message changed during inference.
+    if (!await stillCurrent(event, async () => normalized(await message.fetch(true)))) return;
     const item = await store.create({
       eventId: event.id, guildId: event.guildId, channelId: event.channelId, authorId: event.authorId,
       surface: event.surface, decision: policy.decision, reasons: policy.reasons,
@@ -99,13 +103,31 @@ export function createBot(config: Config, classifierFor: (route: RouteSelection)
     if (policy.decision === 'hold') {
       await store.withPending(item.id, async (current, save) => {
         let alert: Message;
-        try { alert = await sendReview(current); }
+        try { alert = await sendReview(current, undefined, false); }
         catch (error) { await save({ ...current, status: 'dismissed', content: undefined }); throw error; }
-        try { await message.delete(); }
+        let deleted: boolean;
+        try { deleted = await actIfCurrent(event, async () => normalized(await message.fetch(true)), async () => { await message.delete(); }); }
         catch {
           await save({ ...current, decision: 'flag', content: undefined, reasons: [...current.reasons, 'delete_failed'] });
-          await alert.edit({ content: alert.content.replace('Type: hold', 'Type: flag').replace('Expires in 24 hours.', 'Delete failed; original remains visible. Expires in 24 hours.'), embeds: [] });
+          await alert.edit({ content: alert.content.replace('Type: hold', 'Type: flag').replace('Text pending until the hold succeeds.', 'Delete failed; original remains visible.'), components: [buttons(item.id)], embeds: [] });
           console.warn(`Hold delete failed for case ${item.id}; original remains visible.`);
+          return;
+        }
+        if (!deleted) {
+          await save({ ...current, status: 'dismissed', content: undefined, reasons: [...current.reasons, 'message_changed_before_delete'] });
+          try { await alert.edit({ content: `${alert.content}\nClosed: original changed or became unavailable before deletion.`, components: [], embeds: [] }); }
+          catch { console.warn(`Closed case ${item.id} could not update its staff card.`); }
+          return;
+        }
+        try {
+          await alert.edit({ content: alert.content.replace('Text pending until the hold succeeds.', 'Held text is ready for review.'),
+            embeds: [new EmbedBuilder().setTitle('Full text for review').setDescription(escapeMarkdown(current.content ?? ''))],
+            components: [buttons(item.id)] });
+          await save({ ...current, reviewReady: true });
+        }
+        catch {
+          await save({ ...current, reasons: [...current.reasons, 'review_card_update_failed'] });
+          console.warn(`Held case ${item.id} needs a staff card update; inspect the local case before approval.`);
         }
       });
       return;
@@ -169,6 +191,7 @@ export function createBot(config: Config, classifierFor: (route: RouteSelection)
     try {
       const outcome = await store.withPending(id, async (item, save) => {
         if (item.guildId !== config.guildId) throw new Error('Wrong server');
+        if (action === 'approve' && !canApproveCase(item)) throw new Error('Held text is not ready for review; inspect the local case and recover the staff card.');
         let publishedMessageId: string | undefined;
         if (action === 'approve' && item.content) {
           const channel = await client.channels.fetch(item.channelId);
