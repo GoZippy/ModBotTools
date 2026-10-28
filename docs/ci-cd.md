@@ -31,6 +31,15 @@ After a PR creates the check names, select `Test (windows-latest)`,
 changes explicitly: the PR author can edit a PR workflow. See
 [GitHub branch protection](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).
 
+The Dependency Review action requires GitHub's
+[Dependency Graph](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/enable-dependency-graph).
+If its job reports that review is unsupported, the owner should check
+**Settings → Advanced Security → Dependency Graph**, enable it if offered,
+then rerun the failed job. If the setting already shows enabled, investigate
+repository or organization policy before treating the check as available.
+The `npm audit` job still runs, but it does not replace review of newly
+introduced dependencies.
+
 Enable free public-repo
 [CodeQL default setup](https://docs.github.com/en/code-security/how-tos/find-and-fix-code-vulnerabilities/configure-code-scanning/configure-code-scanning)
 and Dependabot security updates. Check live settings and scan results before
