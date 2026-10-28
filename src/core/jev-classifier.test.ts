@@ -6,7 +6,7 @@ import { JevClassifier, ZippyDecisionsClassifier } from './jev-classifier.js';
 import type { ModerationEvent } from './types.js';
 
 test('Jev adapter sends redacted state and reads typed answers', async () => {
-  let request: any;
+  let request: { state: { text: string }; model: string } = { state: { text: '' }, model: '' };
   const server = createServer(async (req, res) => {
     const chunks: Buffer[] = [];
     for await (const chunk of req) chunks.push(Buffer.from(chunk));

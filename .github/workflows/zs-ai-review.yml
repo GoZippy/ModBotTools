@@ -7,6 +7,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: pr-contract-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   pr-contract:
     runs-on: ubuntu-latest
@@ -18,5 +22,8 @@ jobs:
         with:
           node-version: '24.17.0'
       - run: node scripts/zs/pr-body.mjs --env PR_BODY
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+      - run: node scripts/check-pr-evidence.mjs --env PR_BODY
         env:
           PR_BODY: ${{ github.event.pull_request.body }}

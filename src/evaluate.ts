@@ -7,6 +7,10 @@ import type { Decision, ModerationEvent } from './core/types.js';
 interface Example { text: string; expected: Decision; surface?: ModerationEvent['surface']; mentionCount?: number; attachmentCount?: number }
 const path = process.argv[2];
 if (!path) throw new Error('Usage: node dist/evaluate.js path/to/labeled.jsonl');
+const gate = process.argv.includes('--gate');
+if (gate && process.env.CLASSIFIER_PROVIDER && process.env.CLASSIFIER_PROVIDER !== 'local') {
+  throw new Error('The evaluation gate accepts only the local classifier');
+}
 const provider = process.env.CLASSIFIER_PROVIDER === 'jev'
   ? new JevClassifier(process.env.TYPESAFE_API_KEY ?? '', process.env.TYPESAFE_MODEL ?? 'jev-latest')
   : process.env.CLASSIFIER_PROVIDER === 'zippy_decisions'
@@ -27,3 +31,14 @@ for (const [index, line] of lines.entries()) {
 }
 const falseHolds = matrix.allow.hold + matrix.flag.hold;
 console.log(JSON.stringify({ provider: process.env.CLASSIFIER_PROVIDER ?? 'local', count: lines.length, expectedByActual: matrix, falseHolds }, null, 2));
+if (gate) {
+  const expectedCounts = Object.fromEntries(Object.entries(matrix).map(([expected, actual]) =>
+    [expected, Object.values(actual).reduce((sum, count) => sum + count, 0)]));
+  const wrong = Object.entries(matrix).reduce((sum, [expected, actual]) =>
+    sum + Object.entries(actual).filter(([decision]) => decision !== expected)
+      .reduce((count, [, value]) => count + value, 0), 0);
+  if (lines.length < 6 || Object.values(expectedCounts).some(count => count === 0) || wrong > 0) {
+    console.error(`Evaluation gate failed: ${lines.length} examples, ${wrong} mismatches; require at least six examples, every decision class, and zero mismatches.`);
+    process.exitCode = 1;
+  }
+}

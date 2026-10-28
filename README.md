@@ -39,7 +39,7 @@ The public source is at [GoZippy/ModBotTools](https://github.com/GoZippy/ModBotT
 
 ## Contribute
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md), [architecture](docs/architecture.md), [moderation matrix](docs/moderation-matrix.md), and [public boundary](docs/source-available-boundary.md). Please add synthetic or consented fixtures only. There is no production accuracy claim; probability thresholds are provisional.
+Read [CONTRIBUTING.md](CONTRIBUTING.md), [CI and release gates](docs/ci-cd.md), [architecture](docs/architecture.md), [moderation matrix](docs/moderation-matrix.md), and [public boundary](docs/source-available-boundary.md). Please add synthetic fixtures only. There is no production accuracy claim; probability thresholds are provisional.
 
 ## License
 
