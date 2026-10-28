@@ -1,0 +1,54 @@
+{
+  "schema_version": "modbot.features.v1",
+  "updated": "2026-10-28",
+  "features": [
+    {
+      "id": "text-observation",
+      "status": "Implemented",
+      "source": "src/discord-bot.ts",
+      "acceptance": "Only opted-in channels are observed; provider failures cause no moderation action",
+      "evidence": "src/config.test.ts, src/core/policy.test.ts",
+      "remaining": "Test guild drill with a server owner"
+    },
+    {
+      "id": "classifier-routing",
+      "status": "Testing",
+      "source": "src/core/routing.ts, src/core/provider-factory.ts",
+      "acceptance": "Each workflow selects an explicit provider and mode; unknown providers fail closed",
+      "evidence": "src/core/routing.test.ts, src/evaluate.test.ts, docs/provider-smoke.md",
+      "remaining": "Hosted provider account tests and concurrent-load measurement"
+    },
+    {
+      "id": "moderator-review",
+      "status": "Testing",
+      "source": "src/core/case-store.ts, src/discord-bot.ts",
+      "acceptance": "Authorized staff can resolve a case once; a held post is bot-attributed after approval",
+      "evidence": "src/core/case-store.test.ts, src/core/access.test.ts",
+      "remaining": "Failure and restart drills; durable audit log; stale edit handling"
+    },
+    {
+      "id": "offline-provider-evaluation",
+      "status": "Implemented",
+      "source": "src/evaluate.ts",
+      "acceptance": "All configured provider types can be selected explicitly; hosted calls require opt-in; errors and latency are reported without raw text",
+      "evidence": "src/evaluate.test.ts, fixtures/eval.sample.jsonl",
+      "remaining": "Consented labeled holdout set for quality estimates"
+    },
+    {
+      "id": "portable-schemas",
+      "status": "Under Review",
+      "source": "schemas/",
+      "acceptance": "Contracts are versioned and licensed for adoption in other tools",
+      "evidence": "schemas/README.md, schemas/LICENSE",
+      "remaining": "Review downstream reuse and merge the public contribution branch"
+    },
+    {
+      "id": "voice-audio",
+      "status": "Planned",
+      "source": "docs/roadmap.md",
+      "acceptance": "Consent-first capture, speaker attribution, quality study, and human-reviewed actions in a test guild",
+      "evidence": "docs/discord-research.md",
+      "remaining": "No audio capture is implemented"
+    }
+  ]
+}

@@ -5,6 +5,28 @@ import type { Classification, Classifier, ModerationEvent } from './types.js';
 type Noul = { type: 'noul'; noul: number };
 type Score = { type: 'score'; score: number; confidence: number; probabilities: Record<string, number> };
 type Choice = { type: 'choice'; choice: string; confidence: number; probabilities: Record<string, number> };
+const maxResponseBytes = 64 * 1024;
+
+async function readBoundedJson(response: Response): Promise<unknown> {
+  const declared = Number(response.headers.get('content-length'));
+  if (declared > maxResponseBytes) throw new Error('Classifier response exceeds size limit');
+  if (!response.body) throw new Error('Classifier response has no body');
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > maxResponseBytes) {
+      await reader.cancel().catch(() => undefined);
+      throw new Error('Classifier response exceeds size limit');
+    }
+    chunks.push(value);
+  }
+  try { return JSON.parse(new TextDecoder().decode(Buffer.concat(chunks.map(chunk => Buffer.from(chunk))))); }
+  catch { throw new Error('Classifier returned invalid JSON'); }
+}
 
 function distribution(actual: unknown, keys: string[]): Record<string, number> {
   if (!actual || typeof actual !== 'object' || Array.isArray(actual)) throw new Error('Invalid answer distribution');
@@ -34,7 +56,7 @@ class TypedDecisionClassifier implements Classifier {
       signal: AbortSignal.timeout(1800)
     });
     if (!response.ok) throw new Error(`Jev HTTP ${response.status}`);
-    const body = await response.json() as { model?: string; answers?: Record<string, unknown>; zippy?: { backend?: string } };
+    const body = await readBoundedJson(response) as { model?: string; answers?: Record<string, unknown>; zippy?: { backend?: string } };
     const answers = body.answers;
     if (!answers) throw new Error('Jev response has no answers');
     const severity = answers.severity as Score | undefined;
@@ -46,8 +68,10 @@ class TypedDecisionClassifier implements Classifier {
     const expectedScore = ['0', '1', '2', '3'].reduce((sum, key) => sum + Number(key) * severityProbabilities[key]!, 0);
     if (Math.abs(severity.score - expectedScore) > 0.02) throw new Error('Score contradicts probabilities');
     if (topicProbabilities[topic.choice]! + 0.0001 < Math.max(...Object.values(topicProbabilities))) throw new Error('Choice contradicts probabilities');
+    const model = body.model ?? body.zippy?.backend ?? this.model;
+    if (typeof model !== 'string' || !/^[A-Za-z0-9._:/-]{1,128}$/.test(model)) throw new Error('Invalid provider model identity');
     return {
-      provider: this.provider, model: body.model ?? body.zippy?.backend ?? this.model,
+      provider: this.provider, model,
       spam: { probability: probability(answers.spam) }, scam: { probability: probability(answers.scam) },
       abuse: { probability: probability(answers.abuse) }, privacy: { probability: probability(answers.privacy) },
       severity: { score: severity.score, confidence: severity.confidence },

@@ -1,6 +1,8 @@
 # Public and licensing boundary
 
-The bot, normalized event schema, moderation matrix, classifier interface, local rules, synthetic evaluation tools, and moderator workflow are source available under the [PolyForm Noncommercial License 1.0.0](../LICENSE). Personal, educational, and other noncommercial uses are permitted under its terms. This license allows noncommercial modification and sharing, including adaptations of [the matrix](../schemas/moderation-matrix.v1.json) and [its schema](../schemas/moderation-matrix.v1.schema.json) in other tools. It is not an OSI open-source license because commercial use requires a separate agreement. A noncommercial self-hosted community can use the repository without a Zippy account or paid classifier.
+The bot, classifier implementations, local rules, synthetic evaluation tools, and moderator workflow are source available under the [PolyForm Noncommercial License 1.0.0](../LICENSE). Personal, educational, and other noncommercial uses are permitted under its terms. It is not an OSI open-source license because commercial use of the bot requires a separate agreement. A noncommercial self-hosted community can use the repository without a Zippy account or paid classifier.
+
+The [normalized event schema, moderation matrix, and route schema](../schemas/README.md) are separately licensed under Apache 2.0. Other tools may use, modify, and redistribute those contracts, including for commercial purposes, under that license. The schema license does not cover the bot implementation.
 
 Server IDs, tokens, staff policy lists, incident evidence, real member messages, voice recordings, unconsented labels, deployment topology, and billing data must remain outside the public repository. Optional provider adapters are interfaces; no private service implementation or third-party model weights are bundled.
 

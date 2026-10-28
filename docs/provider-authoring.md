@@ -6,10 +6,10 @@ The public extension point is `Classifier.classify(ModerationEvent) → Classifi
 
 1. Document the provider's primary API, authentication, model identity, license or service terms, data destination, retention, limits, and error responses. Do not copy SDK or model code into this repository without license and provenance review.
 2. Add a provider identifier in [`src/core/routing.ts`](../src/core/routing.ts), the route JSON schema, and `readConfig`. Keep credentials in `.env`; the route JSON stores no keys.
-3. Implement the adapter with a bounded timeout, no redirects, narrow endpoint allowlist, explicit request fields, strict answer validation, and a stable model ID. Do not log raw messages or API keys. Local HTTP bridges must remain on loopback until an authenticated network design is implemented.
+3. Implement the adapter with a bounded timeout and response size, no redirects, narrow endpoint allowlist, explicit request fields, strict answer validation, and a stable model ID. Do not log raw messages or API keys. Local HTTP bridges must remain on loopback until an authenticated network design is implemented.
 4. Register it in [`src/index.ts`](../src/index.ts). Keep the adapter lazy so unused provider credentials and processes are not required.
 5. Add a fake-endpoint test for the exact request body, redaction, model/version field, malformed output, timeout, and non-2xx response. A fake endpoint proves plumbing only.
-6. Add a synthetic evaluation fixture and a privacy note. A live provider comparison requires consented, separated train/calibration/holdout examples and human review. Avoid treating vendor confidence as portable across engines.
+6. Add a synthetic evaluation fixture and a privacy note. The offline evaluator must select the provider explicitly and report errors rather than substitute local rules. A live provider comparison requires consented, separated train/calibration/holdout examples and human review. Avoid treating vendor confidence as portable across engines.
 
 ## Other input types
 

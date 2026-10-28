@@ -41,13 +41,35 @@ Hosted routes require their corresponding API key in the local `.env`. A route f
 | `zippy_decisions` | A separate local Zippy Decisions process at `ZIPPY_DECISIONS_URL`; loopback HTTP only | Adapter implemented; sidecar can run Laya locally, but its default uniform backend is plumbing only. This prototype is barred from `hold`. |
 | `systemone_local` | Any self-hosted System One compatible service at `SYSTEMONE_LOCAL_URL`; loopback HTTP only | Generic adapter implemented and validated against a fake endpoint. It is restricted to observe/review. Check each engine's output shape, model license, privacy behavior, and calibration before use. |
 
-All HTTP bridges send redacted message text, surface, mention count, attachment count, and the six questions in the [moderation matrix](../schemas/moderation-matrix.v1.json). They do not send Discord user or guild IDs. The simple redactor cannot guarantee removal of every personal detail. Calls time out after 1.8 seconds, reject redirects, and validate probability ranges and distributions. There is no automatic remote fallback, retry, or cross-provider threshold equivalence. A provider error on a normal message skips bot action; `/submit` still creates a review case marked `classification_unavailable`.
+All HTTP bridges send redacted message text, surface, mention count, attachment count, and the six questions in the [moderation matrix](../schemas/moderation-matrix.v1.json). They do not send Discord user or guild IDs. The simple redactor cannot guarantee removal of every personal detail. Calls time out after 1.8 seconds, reject redirects, cap responses at 64 KB, and validate probability ranges and distributions. There is no automatic remote fallback, retry, or cross-provider threshold equivalence. A provider error on a normal message skips bot action; `/submit` still creates a review case marked `classification_unavailable`.
+
+## Compare providers without Discord
+
+`npm run evaluate` uses the local rules and the synthetic fixture by default. It reports the selected provider, successful classifications, errors, returned model IDs, p50/p95 latency across all attempts (including failures), a decision matrix, and false holds. The `hold` policy is simulated: this command never connects to Discord or deletes a message. Synthetic fixture agreement is a plumbing check, not a moderation accuracy estimate.
+
+```powershell
+npm run evaluate
+npm run evaluate -- --provider systemone_local
+npm run evaluate -- --provider zippy_decisions
+```
+
+For a hosted comparison, put only the classifier key in a gitignored `.env.eval` file, build once, and opt into each remote call explicitly:
+
+```powershell
+npm run build
+node --env-file=.env.eval dist/evaluate.js fixtures/eval.sample.jsonl --provider jev --allow-remote
+node --env-file=.env.eval dist/evaluate.js fixtures/eval.sample.jsonl --provider laya_studio --allow-remote
+```
+
+The command accepts `--model NAME` for Jev, Laya Studio, or `systemone_local`. It processes at most 1,000 examples sequentially, so remote runs may bill for each request. It exits unsuccessfully if any classification fails; errors are counted without printing message text. Use only synthetic or consented, locally stored fixtures. The evaluator does not load the bot's `.env` automatically, and an unknown provider fails instead of falling back to local rules. Compare p50/p95 and errors within the same environment; the local six-row fixture is too small for a useful speed or quality claim.
 
 `systemone_local` is the bridge for self-hosted Laya, Kev, Decis, and similar servers **if** they implement the required wire shape. Compatibility with any particular third-party server remains unverified here. Only `127.0.0.1` and `localhost` with the `/v1/systemone` path are accepted. A production network bridge needs authenticated service identity, tenant isolation, rate limits, and transport security before wider deployment.
 
 Other moderation APIs, such as [OpenAI's Moderation endpoint](https://platform.openai.com/docs/guides/moderation), have their own category taxonomy and scores. They need a separate adapter that maps categories to this project's signals, records the model version, abstains on unsupported categories, and calibrates on consented examples. Treating arbitrary scores as Jev `noul` probabilities would make the policy thresholds misleading. Discord's native [AutoMod](https://docs.discord.com/developers/resources/auto-moderation) is a separate pre-send layer and should not be wrapped as a classifier response.
 
 Community developers can follow the [provider authoring guide](provider-authoring.md). Discord roles can view settings or review cases; they cannot load arbitrary code. New adapters enter through a reviewed source change and CI.
+
+The [local bridge smoke test](provider-smoke.md) confirms wire compatibility with one CPU Laya-backed Zippy Decisions process, but its six synthetic examples produced no expected flags or holds. Do not treat that result as a calibrated moderation classifier.
 
 ## Choosing a route safely
 

@@ -13,7 +13,7 @@ See [how it compares with other moderation approaches](docs/alternatives.md) for
 - Creates 24-hour review cases with moderator **Approve** and **Dismiss** buttons.
 - Uses Discord permissions and optional guild role allowlists for review buttons and read-only `/modbot` settings summaries.
 - Offers `/submit text:...` for genuine pre-publication review in a configured destination channel.
-- Includes a synthetic evaluation fixture and tests for the policy, case store, and Jev request shape.
+- Includes a synthetic evaluation fixture, a provider comparison command, and tests for the policy, case store, and typed-decision request shape.
 
 `hold` on a regular message means the bot deletes an **already posted** text-only message and a moderator can approve a bot-authored repost. Discord AutoMod is the native route for blocking matching content before it appears. See [Discord research](docs/discord-research.md).
 
@@ -24,6 +24,8 @@ See [how it compares with other moderation approaches](docs/alternatives.md) for
 3. In the Discord Developer Portal, enable the **Message Content** privileged intent for this app. Invite the bot with `bot` and `applications.commands` scopes and only the permissions listed in [setup](docs/setup.md).
 4. Run `npm test`, `npm run evaluate`, then `npm start`.
 5. Observe the server before setting `MODERATION_MODE=review`. Enable `hold` only after labeled local testing and moderator agreement.
+
+`npm run evaluate` tests the offline rules against synthetic examples without a Discord token. To compare a local or hosted bridge, use the provider options in [classifier integrations](docs/classifier-integrations.md). Hosted evaluation needs an explicit `--allow-remote` flag and a classifier key.
 
 For per-workflow providers, copy [the route example](config/classifier-routes.example.json) to a gitignored `.local.json` file and follow [classifier integrations](docs/classifier-integrations.md). Run `npm run validate:routes -- config/classifier-routes.local.json` before restarting the bot. [Permissions and ACL](docs/permissions-and-acl.md) explains who can review cases and see settings.
 
@@ -51,6 +53,6 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md), [architecture](docs/architecture.md), [
 
 ## License
 
-This source tree is offered under the [PolyForm Noncommercial License 1.0.0](LICENSE). Personal, educational, and other noncommercial use, modification, and sharing are permitted under its terms. Commercial use requires a separate written license from Zippy Technologies LLC. Self-hosting does not include hosted classifier credits, support, or a managed bot service.
+The bot source and project documentation are offered under the [PolyForm Noncommercial License 1.0.0](LICENSE). Personal, educational, and other noncommercial use, modification, and sharing are permitted under its terms. Commercial use of the bot requires a separate written license from Zippy Technologies LLC. The reusable [schemas and matrix](schemas/README.md) are separately licensed under Apache 2.0 for use in any tool, including commercial tools. Self-hosting does not include hosted classifier credits, support, or a managed bot service.
 
 Earlier public commits were released under MIT. Their recipients retain the rights granted for those versions; this license applies to this source tree and future releases that say so. See the [license transition record](docs/license-transition.md). No source code was imported from private predecessor projects.
