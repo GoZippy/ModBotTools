@@ -11,7 +11,7 @@
     "demo": "npm run build && node dist/demo.js",
     "evaluate": "npm run build && node --env-file-if-exists=.env dist/evaluate.js fixtures/eval.sample.jsonl"
   },
-  "dependencies": { "discord.js": "14.27.0" },
+  "dependencies": { "discord.js": "14.28.1" },
   "devDependencies": { "@types/node": "24.9.1", "typescript": "5.9.3" },
   "license": "PolyForm-Noncommercial-1.0.0"
 }
